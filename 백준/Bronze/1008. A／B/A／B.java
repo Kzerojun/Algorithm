@@ -1,0 +1,13 @@
+import java.util.Scanner;
+
+public class Main{
+    public static void main(String[] ars){
+        Scanner scanner = new Scanner(System.in);
+        double num1 = scanner.nextDouble();
+        double num2 = scanner.nextDouble();
+        System.out.println(num1/num2);
+        
+    }
+    
+    
+}
