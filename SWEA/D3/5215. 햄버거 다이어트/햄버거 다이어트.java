@@ -18,7 +18,6 @@ public class Solution {
                 st = new StringTokenizer(br.readLine());
                 int score = Integer.parseInt(st.nextToken());
                 int calorie = Integer.parseInt(st.nextToken());
-
                 hamBurgers[j] = new HamBurger(score, calorie);
             }
 
@@ -29,23 +28,21 @@ public class Solution {
         }
     }
 
-    static void dfs(HamBurger[] hamBurgers, int limitCalorie, int index, int totalScore, int totalCalorie) {
+    static void dfs(HamBurger[] hamBurgers, int limitCalorie, int totalScore, int totalCalorie, int index) {
         if (totalCalorie > limitCalorie) { 
             return;
         }
 
-        if (index == hamBurgers.length) { 
-            if (totalScore > maxScore) { 
-                maxScore = totalScore; 
-            }
-            return;
+        if(index == hamBurgers.length) {
+        	if(totalScore>maxScore) {
+        		maxScore = totalScore;
+        	}
+        	return;
         }
+        
+        dfs(hamBurgers,limitCalorie,totalScore+hamBurgers[index].score,totalCalorie+hamBurgers[index].calorie,index+1);
+        dfs(hamBurgers,limitCalorie,totalScore,totalCalorie,index+1);
 
-
-        dfs(hamBurgers, limitCalorie, index + 1, totalScore + hamBurgers[index].score, totalCalorie + hamBurgers[index].calorie);
-
-
-        dfs(hamBurgers, limitCalorie, index + 1, totalScore, totalCalorie);
     }
 }
 
@@ -58,3 +55,6 @@ class HamBurger {
         this.calorie = calorie;
     }
 }
+
+
+
