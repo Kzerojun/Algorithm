@@ -18,11 +18,12 @@ public class Main {
         dp[6] = 3;
 
         for (int i = 7; i <= 100; i++) {
-            dp[i] = dp[i-2] + dp[i-3];
+            dp[i] = dp[i-3] + dp[i-4] + dp[i-5];
         }
         for (int i = 0; i < T; i++) {
             int n = Integer.parseInt(br.readLine());
             System.out.println(dp[n]);
+
         }
     }
 }
