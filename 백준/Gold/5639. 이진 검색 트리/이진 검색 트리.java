@@ -6,29 +6,31 @@ class Main{
     public static void main(String[] args)throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        BinaryTree tree = new BinaryTree();
+        Node root = new Node(Integer.parseInt(br.readLine()));
 
-        while(true){
+        while (true) {
             String input = br.readLine();
-            if(input == null || input.isEmpty()) break;
-            int data = Integer.parseInt(input);
-            tree.insert(data);
+            if (input==null||input.isEmpty()) {
+                break;
+            }
+            root.insert(Integer.parseInt(input));
+
         }
-        print(tree.root);
+        print(root);
+
+
     }
-    
-    static void print(Node node){
+
+    static void print(Node node) {
         if (node != null) {
             print(node.left);
             print(node.right);
             System.out.println(node.data);
         }
     }
-
 }
 
 class Node{
-
     int data;
     Node left;
     Node right;
@@ -38,28 +40,23 @@ class Node{
         this.left = null;
         this.right = null;
     }
-}
 
-class BinaryTree{
-    Node root;
-
-    Node insertValue(Node node, int value) {
-        if (node == null) {
-            node = new Node(value);
-            return node;
+    void insert(int input) {
+        if (this.data > input) {
+            if (this.left == null) {
+                this.left = new Node(input);
+                return;
+            }
+            this.left.insert(input);
         }
 
-        if (value < node.data) {
-            node.left = insertValue(node.left, value);
-        }
-        if (value > node.data) {
-            node.right = insertValue(node.right, value);
-        }
+        if (this.data < input) {
+            if (this.right == null) {
+                this.right = new Node(input);
+                return;
+            }
+            this.right.insert(input);
 
-        return node;
-    }
-
-    void insert(int data) {
-        root = insertValue(root, data);
+        }
     }
 }
