@@ -1,5 +1,6 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 class Main{
@@ -17,22 +18,23 @@ class Main{
 		int min = Integer.MAX_VALUE;
 		int[] ans = new int[2];
 
-		while (left < right) {
-			int sum = arr[left] + arr[right];
+		while(left<right) {
+            int tmp = arr[left] + arr[right];
+            
+            if(Math.abs(tmp)<min) {
+                min = Math.abs(tmp);
+                ans[0] = left;
+                ans[1] = right;
+            }
+            
+            if(tmp<0) {
+                left++;
+            }else {
+                right--;
+            }
+        }
 
-			if (Math.abs(sum) < min) {
-				min = Math.abs(sum);
-				ans[0] = arr[left];
-				ans[1] = arr[right];
-			}
 
-			if (sum < 0) {
-				left++;
-			} else {
-				right--;
-			}
-		}
-
-		System.out.println(ans[0] + " " + ans[1]);
+		System.out.println(arr[ans[0]] + " " + arr[ans[1]]);
 	}
 }
