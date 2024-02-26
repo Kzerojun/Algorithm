@@ -1,61 +1,65 @@
 import java.util.*;
 
 class Solution {
+    static int INF = Integer.MAX_VALUE;
     public int solution(int n, int s, int a, int b, int[][] fares) {
-        List<Node>[] list = new ArrayList[n+1];
+        List<Node>[]graph = new ArrayList[n+1];
         int[][] dist = new int[n+1][n+1];
-        int result = Integer.MAX_VALUE;
         
-        for(int i = 1 ; i<=n; i++) {
-            list[i] = new ArrayList<>();
+        for(int i = 1; i<graph.length; i++) {
+            graph[i] = new ArrayList<>();
         }
         
-        for(int[] fare: fares) {
+        for(int i = 1; i< dist.length; i++) {
+            for(int j = 1; j<dist.length; j++) {
+                if(i==j) {
+                    dist[i][j] = 0;
+                }
+                else {
+                    dist[i][j] =INF;
+                }
+            }
+        }
+        
+        for(int[] fare : fares) {
             int from = fare[0];
             int to = fare[1];
             int price = fare[2];
-            list[from].add(new Node(to,price));
-            list[to].add(new Node(from,price));
+            graph[from].add(new Node(to,price));
+            graph[to].add(new Node(from,price));
         }
         
         for(int i = 1; i<=n; i++) {
-            Arrays.fill(dist[i],Integer.MAX_VALUE);
+            move(i,dist,graph);
         }
-        
-        for(int i = 1; i<=n; i++) {
-             move(i,dist,list);
-        }
+        int result = INF;
         
         for(int i = 1; i<=n; i++) {
             if(dist[s][i] +dist[i][a]+dist[i][b]<result) {
-                result = dist[s][i] + dist[i][a] + dist[i][b];
+                result = dist[s][i] +dist[i][a]+dist[i][b];
             }
         }
-    
         
-
         return result;
+        
     }
     
-    static void move(int i,int[][] dist,List<Node>[]list) {
+    static void move(int start,int[][]dist,List<Node>[]graph) {
         PriorityQueue<Node> pq = new PriorityQueue<>((o1,o2)->{
             return o1.price - o2.price;
         });
-        
-        pq.offer(new Node(i,0));
-        dist[i][i] = 0;
+        pq.add(new Node(start,0));
         
         while(!pq.isEmpty()) {
             Node now = pq.poll();
             
-            if(now.price > dist[i][now.to]) continue;
+            if(dist[start][now.number]<now.price) continue;
             
-            for(Node next : list[now.to]) {
-                int nextPrice = now.price + next.price;
-                if(dist[i][next.to]>nextPrice) {
-                    dist[i][next.to] = nextPrice;
-                    pq.offer(new Node(next.to,nextPrice));
-                }
+            for(Node next : graph[now.number]) {
+                if(dist[start][next.number] < now.price + next.price) continue;
+                
+                dist[start][next.number] = now.price+next.price;
+                pq.offer(new Node(next.number,now.price+next.price));
             }
         }
         
@@ -63,11 +67,11 @@ class Solution {
 }
 
 class Node{
-    int to;
+    int number;
     int price;
     
-    Node(int to , int price) {
-        this.to = to;
+    Node(int number, int price) {
+        this.number = number;
         this.price = price;
     }
 }
