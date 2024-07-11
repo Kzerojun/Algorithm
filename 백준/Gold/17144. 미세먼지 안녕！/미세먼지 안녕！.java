@@ -1,137 +1,142 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.Buffer;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.StringTokenizer;
-import java.util.stream.Collectors;
-import javax.print.attribute.standard.DialogTypeSelection;
+import java.io.*;
+import java.util.*;
 
-public class Main {
-    static int R,C,T;
-    static int[][] map;
+class Main {
+    static int N, M, T;
+    static int[][] graph;
+    static int[] dx = {-1, 1, 0, 0};
+    static int[] dy = {0, 0, -1, 1};
+    static List<Location> airCleaner;
+    static int[][] tmp;  // 미세먼지 확산을 위한 임시 배열
 
-    static int[] dx = {0,0,1,-1};
-    static int[] dy = {1,-1,0,0};
+    public static void main(String[] args) throws IOException {
+        init();
+        play();
+    }
 
-    static int[] upper = new int[2];
-    static int[] lower = new int[2];
-
-
-    public static void main(String[]args) throws IOException{
+    private static void init() throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
 
-        R = Integer.parseInt(st.nextToken());
-        C = Integer.parseInt(st.nextToken());
-        T = Integer.parseInt(st.nextToken()); //몇초 후에
+        // R, C, T 입력
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
+        T = Integer.parseInt(st.nextToken());
 
-        map = new int[R][C];
+        graph = new int[N][M];
+        airCleaner = new LinkedList<>();
 
-        List<Point15684> vacumm = new ArrayList<>();
-
-        for (int i = 0; i <R; i++) {
+        // 그래프 입력
+        for (int i = 0; i < N; i++) {
             st = new StringTokenizer(br.readLine());
-            for (int j = 0; j < C; j++) {
-                map[i][j] = Integer.parseInt(st.nextToken());
-                if(map[i][j]==-1){
-                    vacumm.add(new Point15684(i,j));
+            for (int j = 0; j < M; j++) {
+                graph[i][j] = Integer.parseInt(st.nextToken());
+
+                // 공기청정기 위치 기억하기
+                if (graph[i][j] == -1) {
+                    airCleaner.add(new Location(i, j));
+                }
+            }
+        }
+    }
+
+    private static void play() {
+        for (int i = 0; i < T; i++) {
+            spreadDust();
+            airClean();
+        }
+
+        printSol();
+    }
+
+    // 미세먼지 확산 기능
+    private static void spreadDust() {
+        tmp = new int[N][M];
+
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++) {
+                if (graph[i][j] > 0) {  // 미세먼지가 있는 곳에서만 확산
+                    spread(i, j);
                 }
             }
         }
 
-        upper[0] = vacumm.get(0).x;
-        upper[1] = vacumm.get(0).y;
-
-        lower[0] = vacumm.get(1).x;
-        lower[1] = vacumm.get(1).y;
-
-        for(int i = 0; i< T; i++){
-            dustMove();
-            moveAirCleaner();
-        }
-
-        solutionCount();
-
-    }
-
-    static void dustMove(){ //미세 먼지 움직이는 함수
-        Queue<Point15684> q = new LinkedList<>();
-        for (int i = 0; i <R; i++) {
-            for (int j = 0; j < C; j++) {
-                if(map[i][j]>1) q.offer(new Point15684(i,j));
+        // 임시 배열 tmp에 저장된 확산된 미세먼지 양을 원래 배열 graph에 반영
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++) {
+                graph[i][j] += tmp[i][j];
             }
         }
 
-        int[][] replication = new int [R][C];
+        // 공기청정기 위치는 -1로 다시 설정
+        for (Location location : airCleaner) {
+            graph[location.x][location.y] = -1;
+        }
+    }
 
-        for(int i =0; i<R; i++){
-            replication[i] = map[i].clone();
+    // 미세먼지 확산 로직
+    private static void spread(int x, int y) {
+        int spreadAmount = graph[x][y] / 5;
+        int spreadCount = 0;
+
+        for (int k = 0; k < 4; k++) {
+            int nx = x + dx[k];
+            int ny = y + dy[k];
+
+            // 범위 밖이거나 공기청정기 위치면 넘어감
+            if (nx < 0 || ny < 0 || nx >= N || ny >= M || graph[nx][ny] == -1) continue;
+
+            // 확산될 수 있는 곳에 미세먼지 양을 더해줌
+            tmp[nx][ny] += spreadAmount;
+            spreadCount++;
         }
 
-        while(!q.isEmpty()){
-            Point15684 current = q.poll();
-            int possible = 0;
-            for(int i =0; i<4; i++){
-                int nx = current.x+dx[i];
-                int ny = current.y+dy[i];
-                if(nx>=R || ny>=C || nx<0 || ny<0) continue;
+        // 현재 위치의 미세먼지 양 감소
+        tmp[x][y] -= spreadAmount * spreadCount;
+    }
 
-                if(map[nx][ny] != -1){
-                    replication[nx][ny] += map[current.x][current.y]/5;
-                    possible++;
+    // 공기청정기 작동
+    private static void airClean() {
+        // 위쪽 공기 청정기
+        int upperX = airCleaner.get(0).x;
+
+        // 시계 반대 방향 순환
+        for (int i = upperX - 1; i > 0; i--) graph[i][0] = graph[i - 1][0];  // 왼쪽 세로 줄
+        for (int i = 0; i < M - 1; i++) graph[0][i] = graph[0][i + 1];        // 위쪽 가로 줄
+        for (int i = 0; i < upperX; i++) graph[i][M - 1] = graph[i + 1][M - 1];  // 오른쪽 세로 줄
+        for (int i = M - 1; i > 1; i--) graph[upperX][i] = graph[upperX][i - 1];  // 아래쪽 가로 줄
+        graph[upperX][1] = 0;  // 공기청정기에서 나오는 공기는 0으로 설정
+
+        // 아래쪽 공기 청정기
+        int lowerX = airCleaner.get(1).x;
+
+        // 시계 방향 순환
+        for (int i = lowerX + 1; i < N - 1; i++) graph[i][0] = graph[i + 1][0];  // 왼쪽 세로 줄
+        for (int i = 0; i < M - 1; i++) graph[N - 1][i] = graph[N - 1][i + 1];  // 아래쪽 가로 줄
+        for (int i = N - 1; i > lowerX; i--) graph[i][M - 1] = graph[i - 1][M - 1];  // 오른쪽 세로 줄
+        for (int i = M - 1; i > 1; i--) graph[lowerX][i] = graph[lowerX][i - 1];  // 위쪽 가로 줄
+        graph[lowerX][1] = 0;  // 공기청정기에서 나오는 공기는 0으로 설정
+    }
+
+    // 결과 출력
+    private static void printSol() {
+        int sol = 0;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < M; j++) {
+                if (graph[i][j] != -1) {
+                    sol += graph[i][j];
                 }
             }
-            replication[current.x][current.y] -= possible * (map[current.x][current.y] / 5);
         }
 
-        for(int i = 0; i<R; i++){
-            map[i] = replication[i].clone();
-        }
-
-
-
+        System.out.println(sol);
     }
-
-    static void moveAirCleaner() {
-        // 위쪽 공기청정기
-        for (int i = upper[0] - 1; i > 0; i--) map[i][0] = map[i - 1][0];
-        for (int i = 0; i < C - 1; i++) map[0][i] = map[0][i + 1];
-        for (int i = 0; i < upper[0]; i++) map[i][C - 1] = map[i + 1][C - 1];
-        for (int i = C - 1; i > 1; i--) map[upper[0]][i] = map[upper[0]][i - 1];
-        map[upper[0]][1] = 0;
-
-        // 아래쪽 공기청정기
-        for (int i = lower[0] + 1; i < R - 1; i++) map[i][0] = map[i + 1][0];
-        for (int i = 0; i < C - 1; i++) map[R - 1][i] = map[R - 1][i + 1];
-        for (int i = R - 1; i > lower[0]; i--) map[i][C - 1] = map[i - 1][C - 1];
-        for (int i = C - 1; i > 1; i--) map[lower[0]][i] = map[lower[0]][i - 1];
-        map[lower[0]][1] = 0;
-    }
-
-    static void solutionCount(){
-        int solution = 0;
-        for (int i = 0; i <R; i++) {
-            for (int j = 0; j <C; j++) {
-                if(map[i][j]>=1){
-                    solution += map[i][j];
-                }
-
-            }
-
-        }
-        System.out.println(solution);
-    }
-
 }
 
-class Point15684{
-    int x;
-    int y;
-    Point15684(int x, int y){
+class Location {
+    int x, y;
+
+    Location(int x, int y) {
         this.x = x;
         this.y = y;
     }
