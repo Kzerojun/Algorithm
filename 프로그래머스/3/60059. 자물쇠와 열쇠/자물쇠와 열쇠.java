@@ -1,4 +1,5 @@
 import java.util.*;
+
 class Solution {
     static List<List<Key>> keyCombinations;
     
@@ -8,13 +9,11 @@ class Solution {
         return playGame(lock,key);
     }
     
-    private static boolean playGame(int[][] lock,int[][] key) {
+    private static boolean playGame(int[][] lock,int[][]key) {
         int N = lock.length;
         
-        // 문제점: 키의 크기를 고려하지 않고 있습니다.
-        // 개선: 키가 자물쇠 밖으로 나갈 수 있도록 범위를 확장해야 합니다.
-        for(int i = -key.length + 1; i < N; i++) {
-            for(int j = -key.length + 1; j < N; j++) {
+        for(int i = -key.length ; i<N; i++) {
+            for(int j = -key.length; j<N; j++) {
                 boolean can = calculate(i,j,lock);
                 if(can) {
                     return true;
@@ -26,47 +25,64 @@ class Solution {
     }
     
     private static boolean calculate(int originX, int originY,int[][] lock) {
+
+        //90도 180도 270도 360도 미리돌린 키들 확인해보기
         for(List<Key> keys : keyCombinations) {
+            
+            //맵 복사
             int[][] tmp = new int[lock.length][lock.length];
             
             for(int i = 0 ; i<lock.length; i++) {
-               System.arraycopy(lock[i], 0, tmp[i], 0, lock.length);
+               for(int j = 0 ; j<lock.length; j++) {
+                   tmp[i][j] = lock[i][j];
+               }
             }
             
             boolean check = true;
             
-            for(Key key : keys) {
+            // 키 살펴보기
+            for(int i = 0 ; i<keys.size(); i++) {
+                Key key = keys.get(i);
+                // System.out.println("키 위치"+key.x +" "+key.y);
+                
                 int nx = key.x + originX;
                 int ny = key.y + originY;
                 
-                // 문제점: 자물쇠 영역 밖의 키 부분을 무시하고 있습니다.
-                // 개선: 자물쇠 영역 밖의 키 부분은 영향을 주지 않도록 처리해야 합니다.
-                if(nx < 0 || ny < 0 || nx >= lock.length || ny >= lock.length) continue;
+                //만약 맵밖이면 계신 안하기
+                if(nx < 0 || ny < 0 || nx>=lock.length || ny>= lock.length) continue;
                 
-                if(tmp[nx][ny] == 0) {
+                //만약 열쇠가 맞다면 1로 바꾸기
+                // 근데 돌기에돌기가 맞닿으면 실패 불가능함
+                if(tmp[nx][ny] == 0 ) {
                     tmp[nx][ny] = 1;
-                } else {
+                    // System.out.println("열쇠 장착"+key.x +" "+key.y);
+                }else if(tmp[nx][ny] == 1) {
+                    // System.out.println("돌기 닿음"+key.x +" "+key.y);
                     check = false;
                     break;
                 }
             }
             
-            if(check && isUnlocked(tmp)) {
+            
+            
+            for(int i = 0 ; i<lock.length; i++) {
+                for(int j = 0 ; j<lock.length; j++) {
+                    if(tmp[i][j]==0) {
+                        check = false;
+                        break;
+                    }
+                }
+            }
+            
+            if(check) {
                 return true;
             }
+            
+            // System.out.println();
         }
         
         return false;
-    }
-    
-    // 새로운 메소드: 자물쇠가 완전히 열렸는지 확인
-    private static boolean isUnlocked(int[][] lock) {
-        for(int i = 0; i < lock.length; i++) {
-            for(int j = 0; j < lock.length; j++) {
-                if(lock[i][j] == 0) return false;
-            }
-        }
-        return true;
+
     }
     
     private static void init(int[][]key) {
@@ -77,9 +93,7 @@ class Solution {
     private static void rotate(int[][]key) {
         int N = key.length;
         
-        // 문제점: 5번 회전하고 있어 불필요한 연산이 있습니다.
-        // 개선: 4번만 회전하면 충분합니다. (0, 90, 180, 270도)
-        for (int rotation = 0; rotation < 4; rotation++) {
+        for (int rotation = 0; rotation <= 4; rotation++) {
             List<Key> comb = new ArrayList<>();
             int[][] rotated = new int[N][N];
             
@@ -93,7 +107,7 @@ class Solution {
             }
             
             keyCombinations.add(comb);
-            key = rotated;
+            key = rotated; // 다음 회전을 위해 key 업데이트
         }
     }
 }
