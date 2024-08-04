@@ -1,77 +1,125 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.StringTokenizer;
 
-public class Main {
+class  Main{
 
-    static int[][] room;
-    static int N, M;
-    static int[] dx = {-1, 0, 1, 0};
-    static int[] dy = {0, 1, 0, -1}; // 북 동 남 서
-    static int x, y, d, count;
+	static int N,M;
+	static int[] dx = {-1,0,1,0}; //상 우 하 좌
+	static int[] dy = {0,1,0,-1};
+	static int[][] graph;
 
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
+	static Robot robot;
 
-        N = Integer.parseInt(st.nextToken());
-        M = Integer.parseInt(st.nextToken());
+	public static void main(String[] args)throws IOException {
+		init();
+		play();
+	}
+	private static void init() throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st = new StringTokenizer(br.readLine());
 
-        room = new int[N][M];
+		//N M 정보 입력
+		N = Integer.parseInt(st.nextToken());
+		M = Integer.parseInt(st.nextToken());
+		graph = new int[N][M];
 
-        st = new StringTokenizer(br.readLine());
-        x = Integer.parseInt(st.nextToken()); //청소기 위치 r
-        y = Integer.parseInt(st.nextToken()); //청소기 위치 c
-        d = Integer.parseInt(st.nextToken()); //청소기 방향 0 북쪽/1 동쪽/2남쪽 /3 서쪽
+		//로봇 정보 입력
+		st = new StringTokenizer(br.readLine());
+		int x = Integer.parseInt(st.nextToken());
+		int y = Integer.parseInt(st.nextToken());
+		int direction = Integer.parseInt(st.nextToken());
+		robot = new Robot(x,y,direction,0);
 
-        for (int i = 0; i < N; i++) {
-            st = new StringTokenizer(br.readLine());
-            for (int j = 0; j < M; j++) {
-                room[i][j] = Integer.parseInt(st.nextToken());
-            }
-        }
+		//그래프 정보 입력
+		for(int i = 0 ; i<N; i++) {
+			st = new StringTokenizer(br.readLine());
+			for(int j = 0 ; j<M; j++) {
+				graph[i][j] = Integer.parseInt(st.nextToken());
+			}
+		}
+	}
 
-        solution();
-        System.out.println(count);
-    }
+	private static void play() {
+		Queue<Robot> q = new LinkedList<>();
+		q.add(robot);
 
-    static void solution(){
-        while(true){
-            if(room[x][y] == 0) {
-                room[x][y] = 2;
-                count++;
-            }
+		while (!q.isEmpty()) {
+			Robot now = q.poll();
 
-            boolean check = false;
-            for(int i =0; i<4; i++){
-                int nd = (d + 3) % 4;
-                int nx = x + dx[nd];
-                int ny = y + dy[nd];
+//			System.out.println("현재 로봇 위치 와 방향"+now.x+" "+now.y+" "+now.direction);
+//			System.out.println("현재 로봇이 청소한 방 갯수"+now.cleanRoom);
 
-                if(nx<0 || ny <0 || nx >=N || ny >=M) continue;
+			if(graph[now.x][now.y]==0) {
+				graph[now.x][now.y] = -1;
+				q.add(new Robot(now.x,now.y,now.direction, now.cleanRoom+1));
+				continue;
+			}
 
-                if(room[nx][ny] ==0) {
-                    d = nd;
-                    x = nx;
-                    y = ny;
-                    check = true;
-                    break;
-                } else {
-                    d = nd;
-                }
-            }
 
-            if(!check){
-                int nx = x - dx[d];
-                int ny = y - dy[d];
-                if(room[nx][ny]==1){
-                    break;
-                }else{
-                    x = nx;
-                    y = ny;
-                }
-            }
-        }
-    }
+			if(isExistRoom(now)) {
+
+				while(true) {
+					now.direction = (now.direction+3)%4;
+					int nx = now.x + dx[now.direction];
+					int ny = now.y + dy[now.direction];
+
+					if(graph[nx][ny] == 0) {
+						q.add(new Robot(nx, ny, now.direction, now.cleanRoom));
+						break;
+					}
+				}
+
+
+
+			}else {
+				int nx = now.x - dx[now.direction];
+				int ny = now.y - dy[now.direction];
+
+				if(nx < 0 || ny<0 || nx>=N || ny>= M || graph[nx][ny]==1)  {
+					System.out.println(now.cleanRoom);
+					return;
+				}
+
+				q.add(new Robot(nx,ny,now.direction,now.cleanRoom));
+			}
+
+		}
+	}
+
+	private static boolean isExistRoom(Robot robot) {
+
+		for(int i = 0 ; i<4; i++) {
+			int nx = robot.x + dx[i];
+			int ny = robot.y + dy[i];
+
+			if(nx< 0 || ny<0 || nx>=N || ny>=M || graph[nx][ny]==1) continue;
+
+			if(graph[nx][ny]==0){
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+}
+
+class Robot{
+	int x;
+	int y;
+	int direction;
+	int cleanRoom;
+
+	Robot(int x, int y, int direction, int cleanRoom) {
+		this.x = x;
+		this.y = y;
+		this.direction = direction;
+		this.cleanRoom = cleanRoom;
+	}
+
+
 }
