@@ -5,102 +5,82 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.StringTokenizer;
 
-public class Main {
+class Main {
 
-    static int[][] graph;
-    
-    static int[][][] visit;
+	static BufferedReader br;
+	static int N, M;
+	static int[][] graph;
 
-    static int solution = Integer.MAX_VALUE;
-    static int N;
-    static int M;
+	// 상, 하, 좌, 우
+	static int[] dx = {-1, 1, 0, 0};
+	static int[] dy = {0, 0, -1, 1};
 
-    static int[] dx = {0,0,-1,1};
-    static int[] dy = {-1,1,0,0};
-    static public void main(String[]args) throws IOException{
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
+	public static void main(String[] args) throws IOException {
+		init();
+		System.out.println(move());
+	}
 
-        N = Integer.parseInt(st.nextToken());
-        M = Integer.parseInt(st.nextToken());
+	private static void init() throws IOException {
+		br = new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st = new StringTokenizer(br.readLine());
 
-        graph = new int[N][M];
-        visit = new int[N][M][2]; //벽을 부순 경우 , 안부순 경우
-        
-        for(int i = 0; i<N; i++){
-            String number = br.readLine();
-            for(int j = 0; j<M; j++){
-                char ch = number.charAt(j);
-                graph[i][j] = Character.getNumericValue(ch);
-            }
-        }
-        bfs();
-        
-    }
-    
+		N = Integer.parseInt(st.nextToken());
+		M = Integer.parseInt(st.nextToken());
 
-    static void bfs(){
-        Queue<Node2206> queue = new LinkedList<>();
+		graph = new int[N][M];
 
-        queue.offer(new Node2206(0,0,1,0));
-        visit[0][0][0] = 1;
-        visit[0][0][1] = 1;
+		for (int i = 0; i < N; i++) {
+			String str = br.readLine();
+			for (int j = 0; j < M; j++) {
+				graph[i][j] = str.charAt(j) - '0';
+			}
+		}
+	}
 
-        int count = 0;
-        boolean found = false;
+	private static int move() {
+		Queue<Point> q = new LinkedList<>();
+		q.add(new Point(0, 0, 1, 0));
 
-        while(!queue.isEmpty()){
-            for(int i = 0; i< queue.size(); i++){
-                Node2206 current = queue.poll();
+		boolean[][][] visited = new boolean[N][M][2];
+		visited[0][0][0] = true;
 
-                if (current.x == N-1 && current.y == M-1) {
-                    solution = Math.min(solution, current.distance);
-                    continue;
-                }
+		while (!q.isEmpty()) {
+			Point now = q.poll();
 
-                for(int j = 0; j<4; j++){
-                    int ddx = current.x + dx[j];
-                    int ddy = current.y + dy[j];
-                    if(ddx>=0 && ddy>=0 && ddx<N && ddy<M){
-                        if(graph[ddx][ddy]==0){ //벽을 안뚫는 경우
-                            if(visit[ddx][ddy][current.wall] == 0){
-                                visit[ddx][ddy][current.wall] = current.distance+1;
-                                queue.offer(new Node2206(ddx,ddy, current.distance+1, current.wall ));
-                            }
-                        }else{ // 벽을 뚫는 경우
-                            if(current.wall == 0 && visit[ddx][ddy][1]==0){
-                                visit[ddx][ddy][1] = current.distance+1;
-                                queue.offer(new Node2206(ddx,ddy,current.distance+1,1));
-                            }
-                        }
-                    }
-                }
+			if (now.x == N - 1 && now.y == M - 1) {
+				return now.moveCount;
+			}
 
+			for (int i = 0; i < 4; i++) {
+				int nx = now.x + dx[i];
+				int ny = now.y + dy[i];
 
-            }
+				if (nx < 0 || ny < 0 || nx >= N || ny >= M) continue;
 
-        }
+				if (graph[nx][ny] == 1 && now.destory == 0 && !visited[nx][ny][1]) {
+					visited[nx][ny][1] = true;
+					q.add(new Point(nx, ny, now.moveCount + 1, 1));
+				}
 
-        if (solution == Integer.MAX_VALUE) {
-            System.out.println(-1); // 도달할 수 없는 경우
-        } else {
-            System.out.println(solution);
-        }
+				if (graph[nx][ny] == 0 && !visited[nx][ny][now.destory]) {
+					visited[nx][ny][now.destory] = true;
+					q.add(new Point(nx, ny, now.moveCount + 1, now.destory));
+				}
+			}
+		}
 
-    }
-
+		return -1;
+	}
 }
 
-class Node2206{
-    int x;
-    int y;
-    int wall;
-    int distance;
-    
-    Node2206(int x, int y, int distance, int wall){
-        this.x = x;
-        this.y = y;
-        this.distance = distance;
-        this.wall = wall;
-    }
+class Point {
+	int x, y;
+	int moveCount, destory;
+
+	Point(int x, int y, int moveCount, int destory) {
+		this.x = x;
+		this.y = y;
+		this.moveCount = moveCount;
+		this.destory = destory;
+	}
 }
