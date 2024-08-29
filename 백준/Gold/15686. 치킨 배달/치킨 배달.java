@@ -1,84 +1,105 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.*;
+import java.util.*;
 
 public class Main {
-    static int N, M;
-    static int[][] city;
-    static List<Pair> houses;
-    static List<Pair> chickenRestaurants;
-    static boolean[] selected;
-    static int minChickenStreet = Integer.MAX_VALUE;
+	static int N, M;
+	static List<Location> chickens;
+	static List<Location> homes;
+	static List<List<Location>> combinations;
 
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        N = scanner.nextInt();
-        M = scanner.nextInt();
-        city = new int[N][N];
-        houses = new ArrayList<>();
-        chickenRestaurants = new ArrayList<>();
+	public static void main(String[] args) throws IOException {
+		init();
+		simulate();
+	}
 
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                city[i][j] = scanner.nextInt();
-                if (city[i][j] == 1) {
-                    houses.add(new Pair(i, j));
-                } else if (city[i][j] == 2) {
-                    chickenRestaurants.add(new Pair(i, j));
-                }
-            }
-        }
+	private static void init() throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st = new StringTokenizer(br.readLine());
 
-        selected = new boolean[chickenRestaurants.size()];
-        selectChickenRestaurants(0, 0);
-        System.out.println(minChickenStreet);
+		N = Integer.parseInt(st.nextToken());
+		M = Integer.parseInt(st.nextToken());
 
-        scanner.close();
-    }
+		homes = new ArrayList<>();
+		chickens = new ArrayList<>();
+		combinations = new ArrayList<>();
 
-    private static void selectChickenRestaurants(int idx, int count) {
-        if (count == M) {
-            minChickenStreet = Math.min(minChickenStreet, calculateChickenStreet());
-            return;
-        }
+		for (int i = 1; i <= N; i++) {
+			st = new StringTokenizer(br.readLine());
+			for (int j = 1; j <= N; j++) {
+				int number = Integer.parseInt(st.nextToken());
+				if (number == 1) {
+					homes.add(new Location(i, j));
+				}
 
-        if (idx == chickenRestaurants.size()) {
-            return;
-        }
+				if (number == 2) {
+					chickens.add(new Location(i, j));
+				}
+			}
+		}
 
-        selected[idx] = true;
-        selectChickenRestaurants(idx + 1, count + 1);
+		combinations = new ArrayList<>();
+	}
 
-        selected[idx] = false;
-        selectChickenRestaurants(idx + 1, count);
-    }
+	private static void simulate() {
+		makeCombination(new ArrayList<>(), 0);
+		int result = findMinChickenDistance();
+		System.out.println(result);
+	}
 
-    private static int calculateChickenStreet() {
-        int sumChickenStreet = 0;
+	//치킨집 콤비네이션 만들기 M의 크기에 맞게
+	private static void makeCombination(List<Location> tmp, int index) {
+		if (tmp.size() == M) {
+			combinations.add(new ArrayList<>(tmp));
+			return;
+		}
 
-        for (Pair house : houses) {
-            int minDistance = Integer.MAX_VALUE;
+		for (int i = index; i < chickens.size(); i++) {
+			tmp.add(chickens.get(i));
+			makeCombination(tmp, i + 1);
+			tmp.remove(tmp.size() - 1);
+		}
+	}
 
-            for (int i = 0; i < chickenRestaurants.size(); i++) {
-                if (selected[i]) {
-                    int distance = Math.abs(house.x - chickenRestaurants.get(i).x)
-                            + Math.abs(house.y - chickenRestaurants.get(i).y);
-                    minDistance = Math.min(minDistance, distance);
-                }
-            }
+	// 치킨 콤비네이션과 집과의 모든 경우의 수 계산
+	private static int findMinChickenDistance() {
 
-            sumChickenStreet += minDistance;
-        }
+		int result = Integer.MAX_VALUE;
+		for (List<Location> chickenComb : combinations) {
+			int cal = calculateMinChicken(chickenComb);
+			result = Math.min(cal, result);
+		}
 
-        return sumChickenStreet;
-    }
+		return result;
 
-    static class Pair {
-        int x, y;
+	}
 
-        public Pair(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-    }
+	//가장 가까운 치킨집과의거리 -> 도시의 치킨거리 계산
+	private static int calculateMinChicken(List<Location> chickenComb) {
+
+		int sumMinDistance = 0;
+		for (Location home : homes) {
+			int minDistance = Integer.MAX_VALUE;
+
+			for (Location chicken : chickenComb) {
+				int distance = Math.abs(chicken.x - home.x) + Math.abs(chicken.y - home.y);
+				minDistance = Math.min(distance, minDistance);
+			}
+
+			sumMinDistance += minDistance;
+		}
+
+		return sumMinDistance;
+
+	}
+}
+
+class Location {
+	int x;
+	int y;
+
+	Location(int x, int y) {
+		this.x = x;
+		this.y = y;
+	}
 }
