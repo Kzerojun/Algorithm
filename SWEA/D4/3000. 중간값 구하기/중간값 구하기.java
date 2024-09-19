@@ -68,8 +68,6 @@ class Solution {
 
 			System.out.println("#"+t+" "+result);
 
-
-
 		}
 	}
 
