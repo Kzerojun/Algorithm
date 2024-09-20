@@ -5,6 +5,7 @@ class Solution {
     static List<Integer> candidates;
     static int N;
     
+    
     public int solution(int coin, int[] cards) {
         init(cards);
         return playGame(coin, cards);
