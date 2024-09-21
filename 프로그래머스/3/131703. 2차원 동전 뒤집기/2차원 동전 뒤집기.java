@@ -8,6 +8,7 @@ class Solution {
     static List<List<Integer>> colCombination;
     static int result;
 
+    
     public int solution(int[][] beginning, int[][] target) {
         result = Integer.MAX_VALUE; // result를 매번 초기화
         init(beginning);
