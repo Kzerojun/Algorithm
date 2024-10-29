@@ -1,86 +1,127 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
+
+
+import java.io.*;
 
 public class Main {
-    static int N;
-    static int[] dx = {1, 0, -1, 0}; // 우 상 좌 하
-    static int[] dy = {0, -1, 0, 1};
-    static boolean[][] map;
-    static int solution;
+	static int[] dx = { 0, -1, 0, 1 };
+	static int[] dy = { 1, 0, -1, 0 };
 
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+	static boolean[][] graph;
+	static int N;
+	static List<DragonCurve> dragonCurves;
 
-        N = Integer.parseInt(br.readLine());
+	public static void main(String[] args) throws IOException {
+		init();
+		simulate();
+	}
 
-        List<DragonLine> dragonLines = new ArrayList<>();
+	private static void init() throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		N = Integer.parseInt(br.readLine());
 
-        map = new boolean[101][101];
+		graph = new boolean[101][101];
+		dragonCurves = new ArrayList<>();
 
-        for (int i = 0; i < N; i++) {
-            StringTokenizer st = new StringTokenizer(br.readLine());
-            int x = Integer.parseInt(st.nextToken());
-            int y = Integer.parseInt(st.nextToken());
-            int direction = Integer.parseInt(st.nextToken());
-            int generation = Integer.parseInt(st.nextToken());
-            dragonLines.add(new DragonLine(x, y, direction, generation));
-        }
+		for (int i = 0; i < N; i++) {
+			StringTokenizer st = new StringTokenizer(br.readLine());
 
-        dragonMove(dragonLines);
-        solution();
+			int startX = Integer.parseInt(st.nextToken());
+			int startY = Integer.parseInt(st.nextToken());
+			int direction = Integer.parseInt(st.nextToken());
+			int generation = Integer.parseInt(st.nextToken());
 
-        System.out.println(solution);
+			dragonCurves.add(new DragonCurve(startY, startX, direction, generation));
+		}
+	}
 
-    }
+	private static void simulate() {
+		for (DragonCurve curve : dragonCurves) {
+			move(curve);
+		}
 
-    static void dragonMove(List<DragonLine> dragonLines) {
+		int result = 0;
 
-        for (DragonLine dragonLine : dragonLines) {
-            List<Integer> directions = new ArrayList<>();
-            directions.add(dragonLine.direction);
+		for (int i = 0; i <= 99; i++) {
+			for (int j = 0; j <= 99; j++) {
+				if (graph[i][j] && graph[i + 1][j] && graph[i][j + 1] && graph[i + 1][j + 1]) {
+					result++;
+				}
+			}
+		}
 
-            for (int i = 0; i < dragonLine.generation; i++) { // 수정된 부분
-                for (int j = directions.size() - 1; j >= 0; j--) {
-                    directions.add((directions.get(j) + 1) % 4);
-                }
-            }
+		System.out.println(result);
+	}
 
-            map[dragonLine.x][dragonLine.y] = true;
+	private static void move(DragonCurve curve) {
+		Queue<Info> q = new LinkedList<>();
 
-            for (int dir : directions) {
-                dragonLine.x += dx[dir];
-                dragonLine.y += dy[dir];
-                map[dragonLine.x][dragonLine.y] = true;
-            }
+		Info info = new Info(curve.startX, curve.startY);
+		graph[info.x][info.y] = true;
+		
+		//0세대
+		info.x = info.x + dx[curve.direction];
+		info.y = info.y + dy[curve.direction];
+		graph[info.x][info.y] = true;
+		info.directon.add(curve.direction);
+		int genertaion = 1;
+		
+		q.add(info);
+		
 
-        }
-    }
+		//1세대부터 시작
+		while (!q.isEmpty()) {
+			Info now = q.poll();
+			List<Integer> directions = new ArrayList<>(now.directon);
+			
+			if (genertaion > curve.generation) {
+				break;
+			}
 
-    static void solution() {
-        for (int i = 0; i < 100; i++) {
-            for (int j = 0; j < 100; j++) {
-                if (map[i][j] && map[i][j + 1] && map[i + 1][j] && map[i + 1][j + 1]) {
-                    solution++;
-                }
-            }
-        }
-    }
+			for (int i = now.directon.size() - 1; i >= 0; i--) {
+				
+				now.x = now.x + dx[(now.directon.get(i)+1)%4];
+				now.y = now.y + dy[(now.directon.get(i)+1)%4];
+
+
+				graph[now.x][now.y] = true;
+
+				directions.add((now.directon.get(i)+1));
+			}
+			
+
+			now.directon = directions;
+			genertaion++;
+			q.add(now);
+
+
+		}
+
+	}
 }
 
-class DragonLine {
-    int x;
-    int y;
-    int direction;
-    int generation;
+class DragonCurve {
+	int startX;
+	int startY;
+	int direction;
+	int generation;
 
-    DragonLine(int x, int y, int direction, int generation) {
-        this.x = x;
-        this.y = y;
-        this.direction = direction;
-        this.generation = generation;
-    }
+	public DragonCurve(int startX, int startY, int direction, int generation) {
+		this.startX = startX;
+		this.startY = startY;
+		this.direction = direction;
+		this.generation = generation;
+	}
+}
+
+class Info {
+	int x;
+	int y;
+	List<Integer> directon;
+
+	Info(int x, int y) {
+		this.x = x;
+		this.y = y;
+		this.directon = new ArrayList<>();
+	}
 }
