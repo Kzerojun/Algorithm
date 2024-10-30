@@ -1,36 +1,34 @@
-import java.io.BufferedWriter;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.IOException;
-import java.util.StringTokenizer;
+
+class Main{
+
+	public static void main(String[] args) throws IOException {
+		simulate();
+	}
+
+	private static void simulate() throws IOException {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
 
-public class Main {
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
-        int[] num1 = new int[9];
+		int[] number = new int[9];
 
-        for(int i = 0; i<9;i++){
-            StringTokenizer st = new StringTokenizer(br.readLine());
-            num1[i] = Integer.parseInt(st.nextToken());
-        }
-        int max = num1 [0];
-        int point = 1;
-        for ( int j = 0; j<9; j++){
-            if(num1[j]>max){
-                max = num1[j];
-                point = j+1;
-            }
-        }
-        bw.write(Integer.toString(max));
-        bw.newLine();
-        bw.write(Integer.toString(point));
-        br.close();
-        bw.flush();
-        bw.close();
-    }
+		for (int i = 0; i < 9; i++) {
+			number[i] = Integer.parseInt(br.readLine());
+		}
 
+		int solIndex = -1;
+		int solMax = Integer.MIN_VALUE;
+
+		for (int i = 0; i < 9; i++) {
+			if (solMax < number[i]) {
+				solMax = number[i];
+				solIndex = i;
+			}
+		}
+
+		System.out.println(solMax);
+		System.out.println(solIndex+1);
+	}
 }
