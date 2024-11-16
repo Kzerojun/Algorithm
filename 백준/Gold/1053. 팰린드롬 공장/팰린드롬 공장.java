@@ -3,7 +3,7 @@ import java.io.*;
 public class Main {
 
     static StringBuffer s = new StringBuffer();
-    // i: 시작 j: 끝, 즉 dp[i][j] = i ~ j 범위까지 펠린 드롬 만드는 최솟값
+
     static int[][] dp = new int[51][51];
 
     static void swap(int src, int dst) {
