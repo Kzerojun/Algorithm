@@ -2,87 +2,90 @@ import java.util.*;
 
 class Solution {
 
-    static int max = Integer.MIN_VALUE;
-    static List<Integer> resultCombi;
-    
+    private static int maxWinCount = Integer.MIN_VALUE;
+    private static List<Integer> bestCombination;
+
     public int[] solution(int[][] dice) {
-        resultCombi = new ArrayList<>();
-        combination(dice,0,new ArrayList<>());
-        
-        int[] result = new int[resultCombi.size()];
-        
-        for(int i = 0 ; i<result.length; i++) {
-            result[i] = resultCombi.get(i) + 1;
+        bestCombination = new ArrayList<>();
+        findBestCombination(dice, 0, new ArrayList<>());
+
+
+        int[] result = new int[bestCombination.size()];
+        for (int i = 0; i < bestCombination.size(); i++) {
+            result[i] = bestCombination.get(i) + 1;
         }
-        
         return result;
     }
-    
-    static void combination(int[][] dice, int start, List<Integer> combiDices) {
-        if(combiDices.size() == dice.length/2) {
-            List<Integer> combiDicesB = new ArrayList<>();
-            for(int i = 0 ; i<dice.length; i++) {
-                if(!combiDices.contains(i)) {
-                    combiDicesB.add(i);
+
+    private static void findBestCombination(int[][] dice, int start, List<Integer> currentCombination) {
+        if (currentCombination.size() == dice.length / 2) {
+            List<Integer> otherCombination = new ArrayList<>();
+            for (int i = 0; i < dice.length; i++) {
+                if (!currentCombination.contains(i)) {
+                    otherCombination.add(i);
                 }
             }
-
-            calculate(combiDices,combiDicesB,dice);
+            evaluateCombination(currentCombination, otherCombination, dice);
             return;
         }
-    
-        for(int i = start; i<dice.length; i++) {
-            combiDices.add(i);
-            combination(dice,i+1, combiDices);
-            combiDices.remove(combiDices.size() - 1);
+
+        for (int i = start; i < dice.length; i++) {
+            currentCombination.add(i);
+            findBestCombination(dice, i + 1, currentCombination);
+            currentCombination.remove(currentCombination.size() - 1);
         }
     }
 
-    
-    static void calculate(List<Integer> combiDicesA, List<Integer> combiDicesB,int[][]dice) {
-        List<Integer> sumCombiA = new ArrayList<>();
-        List<Integer> sumCombiB = new ArrayList<>();
-        
-        combiSum(combiDicesA,dice,0,0,sumCombiA);
-        combiSum(combiDicesB,dice,0,0,sumCombiB);
-        
-        Collections.sort(sumCombiA);
-        Collections.sort(sumCombiB);
+    private static void evaluateCombination(List<Integer> groupA, List<Integer> groupB, int[][] dice) {
+        List<Integer> groupASums = new ArrayList<>();
+        List<Integer> groupBSums = new ArrayList<>();
 
-        int totalWinCount = 0;
-        
-        for (Integer a : sumCombiA) {
+        generateSums(groupA, dice, 0, 0, groupASums);
+        generateSums(groupB, dice, 0, 0, groupBSums);
+
+        Collections.sort(groupASums);
+        Collections.sort(groupBSums);
+
+        int totalWinCount = calculateWinCount(groupASums, groupBSums);
+
+        if (maxWinCount < totalWinCount) {
+            maxWinCount = totalWinCount;
+            bestCombination = new ArrayList<>(groupA);
+        }
+    }
+
+    private static int calculateWinCount(List<Integer> groupASums, List<Integer> groupBSums) {
+        int winCount = 0;
+
+        for (int aSum : groupASums) {
             int left = 0;
-            int right = sumCombiB.size() - 1;
+            int right = groupBSums.size() - 1;
 
+            // 이분 탐색으로 groupB에서 aSum보다 작은 요소의 개수 찾기
             while (left <= right) {
                 int mid = (left + right) / 2;
 
-                if (a > sumCombiB.get(mid)) {
+                if (aSum > groupBSums.get(mid)) {
                     left = mid + 1;
                 } else {
                     right = mid - 1;
                 }
             }
 
-            totalWinCount += left;
+            winCount += left;
         }
-        
-        if(max < totalWinCount) {
-            max = totalWinCount;
-            resultCombi = new ArrayList<>(combiDicesA);
-        }
+        return winCount;
     }
-    
-    static void combiSum(List<Integer>combiDices,int[][]dice,int sum, int index,List<Integer> sumCombi) {
-        
-        if(index == combiDices.size()) {
-            sumCombi.add(sum);
+
+    private static void generateSums(List<Integer> group, int[][] dice, int currentSum, int index, List<Integer> sums) {
+        if (index == group.size()) {
+            sums.add(currentSum);
             return;
         }
-        
-        for(int i = 0 ; i<6; i++) {
-            combiSum(combiDices,dice,sum+dice[combiDices.get(index)][i],index+1,sumCombi);
+
+        int diceIndex = group.get(index);
+        for (int faceValue : dice[diceIndex]) {
+            generateSums(group, dice, currentSum + faceValue, index + 1, sums);
         }
     }
 }
