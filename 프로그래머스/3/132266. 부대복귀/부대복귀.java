@@ -37,10 +37,6 @@ class Solution {
             result[i] = dist[sources[i]];
         }
         return result;
-        
-        
-        
-        
     }
     
     static void move(int start,int[]dist,List<Integer>[]graph){
