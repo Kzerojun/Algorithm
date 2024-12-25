@@ -49,9 +49,6 @@ class Solution {
         }
         return list;
     }
-    
-    
-    
 }
 
 class Target {
