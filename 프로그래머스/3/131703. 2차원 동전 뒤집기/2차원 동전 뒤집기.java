@@ -39,8 +39,6 @@ class Solution {
 
                 flipCol(col, tmp);
             }
-
-        
         }
 
         return result == Integer.MAX_VALUE ? -1 : result;
