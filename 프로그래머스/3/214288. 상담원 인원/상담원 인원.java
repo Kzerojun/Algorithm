@@ -46,7 +46,6 @@ class Solution {
             counselors[type]++;
         }
         
-        //남은 상담수들
         int remainWorkerCount = n-k;
         
         while(remainWorkerCount-- > 0){
