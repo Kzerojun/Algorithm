@@ -31,26 +31,20 @@ class Solution {
     private static void makeGroup(int[][]land) {
         int groupNumber = 1;
         
-        
         for(int j = 0 ; j<M; j++) {
             int size = 0;
             boolean[] check = new boolean[N*M/2+1];
             for(int i = 0 ; i<N; i++) {
-                // System.out.println("현재 위치"+i+" "+j);
                 if(land[i][j]==1 && !visited[i][j]) {
                     move(new Location(i,j),groupNumber++,land);   
                 }
                 if(!check[group[i][j]]) {
                     size += groupSize[group[i][j]];
-                    // System.out.println("그룹 몇개"+groupSize[group[i][j]]);
                     check[group[i][j]] = true;
                 }
                 
             }
-            // System.out.println("사이즈"+size);
-            
             maxResult = Math.max(maxResult,size);
-            
         }
     
     }
@@ -76,7 +70,6 @@ class Solution {
                 size++;
             }
         }
-        
         groupSize[groupNumber] = size;
     }
 }
