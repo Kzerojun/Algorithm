@@ -10,7 +10,6 @@ class Solution {
         return calculate();
     }
     
-    
     private static void init(int[][] scores) {
         tmpScores = new ArrayList<>();
         wanho = new Score(scores[0][0],scores[0][1]);
@@ -37,24 +36,20 @@ class Solution {
             highReviewScore = Math.max(highReviewScore,score.reviewScore);
             
             if(score.reviewScore < highReviewScore) {
-                if(score.workScore== wanho.workScore && score.reviewScore == wanho.reviewScore) {
+                if(score == wanho) {
                     return -1;
                 }
                 continue;
             }
             
             if(score.workScore + score.reviewScore > wanho.workScore + wanho.reviewScore) {
-                rank++;
+               rank++;
             }
-            
             
         }
         
         return rank;
     }
-    
-    
-    
 }
 
 class Score {
