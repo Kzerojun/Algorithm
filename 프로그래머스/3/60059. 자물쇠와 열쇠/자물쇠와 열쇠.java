@@ -77,8 +77,6 @@ class Solution {
             if(check) {
                 return true;
             }
-            
-            // System.out.println();
         }
         
         return false;
@@ -105,7 +103,6 @@ class Solution {
                     }
                 }
             }
-            
             keyCombinations.add(comb);
             key = rotated; // 다음 회전을 위해 key 업데이트
         }
