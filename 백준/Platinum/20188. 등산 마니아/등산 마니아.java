@@ -16,7 +16,7 @@ public class Main {
 
 	public static void main(String[] args) throws Exception {
 		init();
-		int result = simulate();
+		long result = simulate();
 		printResult(result);
 	}
 
@@ -43,8 +43,8 @@ public class Main {
 
 	}
 
-	private static int simulate() {
-		int result = 0;
+	private static long simulate() {
+		long result = 0;
 
 		dfs(1, -1);
 
@@ -55,8 +55,8 @@ public class Main {
 
 		return result;
 	}
-	static int comb(int target) {
-		return (target * (target - 1)) /2;
+	static long comb(int target) {
+		return ((long) target * (target - 1)) /2;
 	}
 
 	private static void dfs(int child, int parent) {
@@ -75,7 +75,7 @@ public class Main {
 	}
 
 
-	private static void printResult(int result) throws Exception {
+	private static void printResult(long result) throws Exception {
 		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 		bw.write(result + " ");
 		bw.flush();
